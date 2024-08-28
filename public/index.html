@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRICE PLAN</title>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"
+        integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+        crossorigin="anonymous"></script>
+    <script src="./index.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body x-data="pricePlan()" x-init="init()">
+
+    <div class="container">
+
+        <div class="message" :class="messageType" x-text="message" x-show="message"></div>
+
+        <div class="heading">PRICE PLANS</div>
+
+        <div x-show="currentPage === 'main'">
+
+            <section class="sec1" @click="currentPage = 'availablePlans'">
+                <div class="subheading">AVAILABLE PRICE PLANS</div>
+            </section>
+
+            <section class="sec2" @click="currentPage = 'phoneBillTotal'">
+                <div class="subheading">PHONE BILL TOTAL</div>
+            </section>
+
+            <section class="sec3" @click="currentPage = 'newPlan'">
+                <div class="subheading">NEW PRICE PLAN</div>
+            </section>
+
+            <section class="sec4" @click="currentPage = 'updatePlan'">
+                <div class="subheading">UPDATE PRICE PLAN</div>
+            </section>
+
+            <section class="sec5" @click="currentPage = 'deletePlan'">
+                <div class="subheading">DELETE PRICE PLAN</div>
+            </section>
+
+            <section class="sec6" @click="currentPage = 'totalForPlans'">
+                <div class="subheading">TOTAL FOR EACH PRICE PLAN</div>
+            </section>
+
+        </div>
+
+        <div x-show="currentPage === 'availablePlans'" class="sec1">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">AVAILABLE PRICE PLANS</div>
+            <div class="content">
+               <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Plan Name</th>
+                            <th>Call Cost (R)</th>
+                            <th>SMS Cost (R)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="plan in pricePlans" >
+                            <tr>
+                                <td x-text="plan.id"></td>
+                                <td x-text="plan.plan_name"></td>
+                                <td x-text="plan.call_price"></td>
+                                <td x-text="plan.sms_price"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'phoneBillTotal'" class="sec2">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">PHONE BILL TOTAL</div>
+            <div class="content">
+                <form @submit.prevent="calculateTotalBill">
+                    <div class="form-group">
+                        <label for="price_plan">Price Plan Name</label>
+                        <select id="price_plan" x-model="totalBill.price_plan" class="form-control">
+                            <option value="" disabled>Select a Price Plan</option>
+                            <template x-for="plan in pricePlans">
+                                <option :value="plan.plan_name" x-text="plan.plan_name"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="actions">Actions (e.g., call, sms, call)</label>
+                        <input type="text" id="actions" x-model="totalBill.actions" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Total</button>
+                </form>
+                <div x-show="totalBillResult" class="result">
+                    Total Phone Bill: <span x-text="totalBillResult"></span>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'newPlan'" class="sec3">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">NEW PRICE PLAN</div>
+            <div class="content">
+                <form @submit.prevent="createPricePlan">
+                    <div class="form-group">
+                        <label for="name">Plan Name</label>
+                        <input type="text" id="name" x-model="newPlan.name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="call_cost">Call Cost</label>
+                        <input type="text" id="call_cost" x-model="newPlan.call_cost" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="sms_cost">SMS Cost</label>
+                        <input type="text" id="sms_cost" x-model="newPlan.sms_cost" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Plan</button>
+                </form>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'updatePlan'" class="sec4">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">UPDATE PRICE PLAN</div>
+            <div class="content">
+                <form @submit.prevent="updatePricePlan">
+                    <div class="form-group">
+                        <label for="name">Plan Name</label>
+                        <input type="text" id="name" x-model="updatedPlan.name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="call_cost">New Call Cost</label>
+                        <input type="text" id="call_cost" x-model="updatedPlan.call_cost" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="call_cost">New SMS Cost</label>
+                        <input type="text" id="sms_cost" x-model="updatedPlan.sms_cost" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Plan</button>
+                </form>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'deletePlan'" class="sec5">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">DELETE PRICE PLAN</div>
+            <div class="content">
+                <form @submit.prevent="deletePricePlan">
+                    <div class="form-group">
+                        <label for="plan_id">Plan ID</label>
+                        <input type="text" id="plan_id" x-model="deletePlan" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Delete Plan</button>
+                </form>
+            </div>
+        </div>
+
+        <div x-show="currentPage === 'totalForPlans'" class="sec6">
+            <button class="btn btn-primary" @click="currentPage = 'main'">Back</button>
+            <div class="subheading">TOTAL FOR EACH PRICE PLAN</div>
+            <div class="content">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Plan Name</th>
+                            <th>Total (R)</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="plan in totalForPlans" >
+                            <tr>
+                                <td x-text="plan.plan_name"></td>
+                                <td x-text="plan.total.toFixed(2)"></td>
+                                <td x-text="plan.updated_at"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
