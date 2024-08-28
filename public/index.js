@@ -90,7 +90,7 @@ document.addEventListener('alpine:init', () => {
             try {
                 const response = await axios.post('/api/phonebill/', this.totalBill);
                 this.totalBillResult = response.data.total; //Stores the result
-                this.setMessage(`The total phone bill is R${this.totalBillResult}`, 'SUCCESS');
+                this.setMessage(`The total phone bill is ${this.totalBillResult}`, 'SUCCESS');
             } catch (error) {
                 this.setMessage(error.response.data.message || 'Error calculating total phone bill', 'error');
             }
